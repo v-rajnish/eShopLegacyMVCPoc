@@ -140,16 +140,6 @@ public ActionResult Create([Bind("Id,Name,Description,Price,PictureFileName,Cata
             return RedirectToAction("Index");
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            _log.Debug($"Now disposing");
-            if (disposing)
-            {
-                service.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         private void ChangeUriPlaceholder(IEnumerable<CatalogItem> items)
         {
             foreach (var catalogItem in items)

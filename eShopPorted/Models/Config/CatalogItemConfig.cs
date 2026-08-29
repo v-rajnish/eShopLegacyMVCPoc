@@ -17,7 +17,8 @@ namespace eShopPorted.Models.Config
                 .HasMaxLength(50);
 
             builder.Property(ci => ci.Price)
-                .IsRequired();
+                .IsRequired()
+                .HasColumnType("decimal(18,2)");
 
             builder.Property(ci => ci.PictureFileName)
                 .IsRequired();

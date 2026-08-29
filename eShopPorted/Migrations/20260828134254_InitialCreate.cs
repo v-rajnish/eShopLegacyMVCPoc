@@ -1,19 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace eShopPorted.Migrations
 {
-    public partial class Initial : Migration
+    /// <inheritdoc />
+    public partial class InitialCreate : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
                 name: "CatalogBrand",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Brand = table.Column<string>(maxLength: 100, nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Brand = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -24,9 +29,9 @@ namespace eShopPorted.Migrations
                 name: "CatalogType",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Type = table.Column<string>(maxLength: 100, nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,18 +42,18 @@ namespace eShopPorted.Migrations
                 name: "Catalog",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(maxLength: 50, nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    Price = table.Column<decimal>(nullable: false),
-                    PictureFileName = table.Column<string>(nullable: false),
-                    CatalogTypeId = table.Column<int>(nullable: false),
-                    CatalogBrandId = table.Column<int>(nullable: false),
-                    AvailableStock = table.Column<int>(nullable: false),
-                    RestockThreshold = table.Column<int>(nullable: false),
-                    MaxStockThreshold = table.Column<int>(nullable: false),
-                    OnReorder = table.Column<bool>(nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PictureFileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CatalogTypeId = table.Column<int>(type: "int", nullable: false),
+                    CatalogBrandId = table.Column<int>(type: "int", nullable: false),
+                    AvailableStock = table.Column<int>(type: "int", nullable: false),
+                    RestockThreshold = table.Column<int>(type: "int", nullable: false),
+                    MaxStockThreshold = table.Column<int>(type: "int", nullable: false),
+                    OnReorder = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,18 +100,18 @@ namespace eShopPorted.Migrations
                 columns: new[] { "Id", "AvailableStock", "CatalogBrandId", "CatalogTypeId", "Description", "MaxStockThreshold", "Name", "OnReorder", "PictureFileName", "Price", "RestockThreshold" },
                 values: new object[,]
                 {
-                    { 2, 100, 2, 1, ".NET Black & White Mug", 0, ".NET Black & White Mug", false, "2.png", 8.50m, 0 },
-                    { 9, 100, 5, 1, "Cup<T> White Mug", 0, "Cup<T> White Mug", false, "9.png", 12m, 0 },
                     { 1, 100, 2, 2, ".NET Bot Black Hoodie", 0, ".NET Bot Black Hoodie", false, "1.png", 19.5m, 0 },
+                    { 2, 100, 2, 1, ".NET Black & White Mug", 0, ".NET Black & White Mug", false, "2.png", 8.50m, 0 },
                     { 3, 100, 5, 2, "Prism White T-Shirt", 0, "Prism White T-Shirt", false, "3.png", 12m, 0 },
                     { 4, 100, 2, 2, ".NET Foundation T-shirt", 0, ".NET Foundation T-shirt", false, "4.png", 12m, 0 },
+                    { 5, 100, 5, 3, "Roslyn Red Sheet", 0, "Roslyn Red Sheet", false, "5.png", 8.5m, 0 },
                     { 6, 100, 2, 2, ".NET Blue Hoodie", 0, ".NET Blue Hoodie", false, "6.png", 12m, 0 },
                     { 7, 100, 5, 2, "Roslyn Red T-Shirt", 0, "Roslyn Red T-Shirt", false, "7.png", 12m, 0 },
                     { 8, 100, 5, 2, "Kudu Purple Hoodie", 0, "Kudu Purple Hoodie", false, "8.png", 8.5m, 0 },
-                    { 12, 100, 5, 2, "Prism White TShirt", 0, "Prism White TShirt", false, "12.png", 12m, 0 },
-                    { 5, 100, 5, 3, "Roslyn Red Sheet", 0, "Roslyn Red Sheet", false, "5.png", 8.5m, 0 },
+                    { 9, 100, 5, 1, "Cup<T> White Mug", 0, "Cup<T> White Mug", false, "9.png", 12m, 0 },
                     { 10, 100, 2, 3, ".NET Foundation Sheet", 0, ".NET Foundation Sheet", false, "10.png", 12m, 0 },
-                    { 11, 100, 2, 3, "Cup<T> Sheet", 0, "Cup<T> Sheet", false, "11.png", 8.5m, 0 }
+                    { 11, 100, 2, 3, "Cup<T> Sheet", 0, "Cup<T> Sheet", false, "11.png", 8.5m, 0 },
+                    { 12, 100, 5, 2, "Prism White TShirt", 0, "Prism White TShirt", false, "12.png", 12m, 0 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -120,6 +125,7 @@ namespace eShopPorted.Migrations
                 column: "CatalogTypeId");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

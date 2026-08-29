@@ -6,33 +6,40 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eShopPorted.Models;
 
+#nullable disable
+
 namespace eShopPorted.Migrations
 {
     [DbContext(typeof(CatalogDBContext))]
-    [Migration("20201130044339_Initial")]
-    partial class Initial
+    [Migration("20260828134254_InitialCreate")]
+    partial class InitialCreate
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.6-servicing-10079")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("eShopPorted.Models.CatalogBrand", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Brand")
                         .IsRequired()
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("CatalogBrand");
+                    b.ToTable("CatalogBrand", (string)null);
 
                     b.HasData(
                         new
@@ -66,30 +73,42 @@ namespace eShopPorted.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
-                    b.Property<int>("AvailableStock");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CatalogBrandId");
+                    b.Property<int>("AvailableStock")
+                        .HasColumnType("int");
 
-                    b.Property<int>("CatalogTypeId");
+                    b.Property<int>("CatalogBrandId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Description");
+                    b.Property<int>("CatalogTypeId")
+                        .HasColumnType("int");
 
-                    b.Property<int>("MaxStockThreshold");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaxStockThreshold")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50);
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("OnReorder");
+                    b.Property<bool>("OnReorder")
+                        .HasColumnType("bit");
 
                     b.Property<string>("PictureFileName")
-                        .IsRequired();
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("RestockThreshold");
+                    b.Property<int>("RestockThreshold")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -97,7 +116,7 @@ namespace eShopPorted.Migrations
 
                     b.HasIndex("CatalogTypeId");
 
-                    b.ToTable("Catalog");
+                    b.ToTable("Catalog", (string)null);
 
                     b.HasData(
                         new
@@ -274,15 +293,18 @@ namespace eShopPorted.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("CatalogType");
+                    b.ToTable("CatalogType", (string)null);
 
                     b.HasData(
                         new
@@ -312,12 +334,18 @@ namespace eShopPorted.Migrations
                     b.HasOne("eShopPorted.Models.CatalogBrand", "CatalogBrand")
                         .WithMany()
                         .HasForeignKey("CatalogBrandId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("eShopPorted.Models.CatalogType", "CatalogType")
                         .WithMany()
                         .HasForeignKey("CatalogTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CatalogBrand");
+
+                    b.Navigation("CatalogType");
                 });
 #pragma warning restore 612, 618
         }
