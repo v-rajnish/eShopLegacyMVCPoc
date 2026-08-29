@@ -25,6 +25,10 @@
 | **Infrastructure as Code** | ✅ Bicep |
 | **Database (Source)** | SQL Server (LocalDB) |
 | **Database (Target)** | ✅ Azure SQL Database |
+| **Resource Group** | `rg-eshop-poc` (placeholder) |
+| **Target Region** | East US (`eastus`) |
+| **SQL Authentication** | ✅ Microsoft Entra ID + Managed Identity (passwordless) |
+| **Azure Subscription** | ⏳ To be provided by CAF team |
 
 ---
 
@@ -35,8 +39,8 @@
 | **Phase 1** | Plan Migration (gather inputs, high-level plan) | ✅ **Complete** | `/Phase1-Plan-Migration` |
 | **Phase 2** | Assess Project (deep code & dependency analysis) | ✅ **Complete** | `/phase2-assessproject` |
 | **Phase 3** | Code Migration | ✅ **Complete** | `/phase3-migratecode` |
-| **Phase 4** | Infrastructure (Bicep) | ⬜ Not started | `/phase4-generateinfra` |
-| **Phase 5** | Validation & Deployment | ⬜ Not started | — |
+| **Phase 4** | Infrastructure (Bicep) | ✅ **Complete** — templates generated & validated (placeholders pending CAF) | `/phase4-generateinfra` |
+| **Phase 5** | Validation & Deployment | 🔄 **Plan ready** — checklist prepared; execution ⚠️ blocked on CAF subscription | `/phase5-deploytoazure` |
 
 **Legend:** ✅ Complete · 🔄 In Progress · ⬜ Not Started · ⚠️ Blocked
 
@@ -72,6 +76,7 @@ Grounded, per-area checklists created under `reports/checklists/`:
 | 6 | API Endpoints | `checklists/06-api-endpoints.md` | ✅ Done |
 | 7 | Static Assets | `checklists/07-static-assets.md` | ✅ Done |
 | 8 | Infrastructure Preparation | `checklists/08-infrastructure-prep.md` | ✅ App-mod done (Bicep in Phase 4) |
+| 9 | Phase 5 Validation & Deployment | `checklists/09-deployment.md` | 🔄 Ready — blocked on CAF subscription |
 
 ---
 
@@ -85,8 +90,30 @@ Grounded, per-area checklists created under `reports/checklists/`:
 
 ## ⏭️ Next Step
 
-➡️ **Phase 4 – Infrastructure.** Run `/phase4-generateinfra` to generate the Bicep templates
-(App Service, Azure SQL, Key Vault, App Insights, Managed Identity) for deployment.
+➡️ **Phase 5 — execute deployment.** Full plan authored in `reports/checklists/09-deployment.md`
+(prerequisites, parameter updates, what-if validation, provisioning, SQL managed-identity setup,
+app deploy, post-deployment verification, rollback, sign-off).
+When the **CAF Azure subscription** is available:
+1. Update `infra/main.parameters.json` (`sqlAadAdminName`, `sqlAadAdminObjectId`).
+2. `az account set --subscription <id>`.
+3. Run what-if → `az deployment sub create` → deploy app → post-deploy verification.
+
+### Phase 5 Plan Prepared (2026-08-30)
+
+- ✅ Authored `reports/checklists/09-deployment.md` with placeholder values (CAF subscription pending).
+- Covers: prerequisites, placeholder-replacement table, what-if validation, subscription-scope provisioning, **Azure SQL contained-user setup for the managed identity**, `dotnet publish` + zip deploy, and full post-deployment verification (endpoints `/`, `/api/brands`, `/api/files`; SQL via managed identity; Key Vault reference; App Insights; security checks), plus rollback and sign-off steps.
+
+### Phase 4 Outcome (2026-08-30) — Templates Generated
+
+- ✅ Authored Bicep under `infra/`: `main.bicep` (sub-scope, creates RG), `resources.bicep` (all resources), `main.parameters.json`.
+- ✅ Resources: **Linux App Service (DOTNETCORE|8.0)** + Plan, **Azure SQL Server + DB** (Entra-only auth), **Key Vault** (RBAC), **App Insights** + **Log Analytics**, **User-Assigned Managed Identity**.
+- ✅ **Passwordless SQL**: connection string uses `Authentication=Active Directory Default` + UAMI `clientId`; stored in Key Vault and consumed via Key Vault reference.
+- ✅ Security hardening: `httpsOnly`, `minTlsVersion 1.2`, `ftpsState Disabled`, Entra-only SQL auth, KV RBAC (`Key Vault Secrets User`).
+- ✅ App settings wired: `UseMockData=false`, `AZURE_CLIENT_ID`, `APPLICATIONINSIGHTS_CONNECTION_STRING`, `ConnectionStrings__DefaultConnection` (KV ref).
+- ✅ App Service **health check** configured (`healthCheckPath: '/'`) for load-balancer instance probing.
+- ✅ Re-validated (2026-08-30): `get_errors` clean on both Bicep files; `az bicep build` succeeds (exit 0).
+- ⏳ **Placeholders pending CAF handoff:** subscription ID, Entra SQL admin name + object ID.
+- ↪️ Post-deploy manual step: add the managed identity as a **contained DB user** in Azure SQL and grant `db_datareader`/`db_datawriter`/`db_ddladmin` (EF migrations run at startup).
 
 ### Phase 3 Outcome (2026-08-28)
 

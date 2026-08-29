@@ -31,21 +31,22 @@
 
 ## Tasks – Azure Infrastructure (Bicep)
 
-- [ ] Author Bicep for **App Service Plan + App Service** (Linux, .NET 8).
-- [ ] Author Bicep for **Azure SQL Server + Database** (with Entra ID admin).
-- [ ] Add **Key Vault** + secret references for connection strings.
-- [ ] Add **Application Insights** + **Log Analytics workspace** (checklist 5).
-- [ ] Enable **System-Assigned Managed Identity** on App Service (checklist 4).
-- [ ] Configure App Service app settings (connection string ref, `UseMockData=false`).
-- [ ] Add HTTPS-only + minimum TLS 1.2 on App Service.
-- [ ] Validate templates: `get_errors` on Bicep + `azure_check_predeploy` before deploy.
+- [x] Author Bicep for **App Service Plan + App Service** (Linux, .NET 8). — `infra/resources.bicep`
+- [x] Author Bicep for **Azure SQL Server + Database** (with Entra ID admin, Entra-only auth).
+- [x] Add **Key Vault** + secret reference for the connection string (`DefaultConnection`).
+- [x] Add **Application Insights** + **Log Analytics workspace** (checklist 5).
+- [x] Enable **Managed Identity** on App Service (User-Assigned; used for SQL + Key Vault).
+- [x] Configure App Service app settings (connection string KV ref, `UseMockData=false`, `AZURE_CLIENT_ID`).
+- [x] Add HTTPS-only + minimum TLS 1.2 on App Service.
+- [x] Validate templates: `az bicep build` succeeds (exit 0); no `get_errors` on Bicep.
+- [ ] `azure_check_predeploy` / `what-if` before deploy — **deferred until CAF subscription is assigned**.
 
 ---
 
 ## Verification
 
-- [ ] App runs on .NET 8 locally with no legacy framework references.
-- [ ] Bicep validates with no errors.
-- [ ] Provisioned App Service can reach Azure SQL via Managed Identity.
+- [x] App runs on .NET 8 locally with no legacy framework references.
+- [x] Bicep validates with no errors (`az bicep build` exit 0).
+- [ ] Provisioned App Service can reach Azure SQL via Managed Identity — **pending deploy in CAF subscription**.
 
-**Status:** ⬜ Not started
+**Status:** 🔄 In Progress — templates generated with placeholders; deploy pending CAF subscription.
