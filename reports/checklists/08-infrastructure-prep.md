@@ -19,13 +19,13 @@
 
 ## Tasks – App Modernization
 
-- [ ] Change `<TargetFramework>net461</TargetFramework>` → `net8.0`.
-- [ ] Remove `<PackageReference Include="Microsoft.AspNetCore" ...>` (use FrameworkReference `Microsoft.AspNetCore.App`).
-- [ ] Remove legacy `Autofac.Mvc5`, `WebGrease`, `Antlr` packages (not needed on .NET 8).
-- [ ] Update `Program.cs` to `WebApplication.CreateBuilder` (or keep generic host) with .NET 8 patterns.
-- [ ] Replace `IHostingEnvironment` → `IWebHostEnvironment`; `app.UseMvc` → endpoint routing (`MapControllerRoute`).
-- [ ] Update Autofac wiring to `.UseServiceProviderFactory(new AutofacServiceProviderFactory())` if keeping Autofac.
-- [ ] `dotnet build` + `dotnet run` succeed on .NET 8 locally.
+- [x] Change `<TargetFramework>net461</TargetFramework>` → `net8.0`.
+- [x] Remove `<PackageReference Include="Microsoft.AspNetCore" ...>` (Web SDK provides `Microsoft.AspNetCore.App`).
+- [x] Remove legacy `Autofac.Mvc5`, `WebGrease`, `Antlr` packages (not needed on .NET 8).
+- [x] Update `Program.cs` to `WebApplication.CreateBuilder` with .NET 8 minimal hosting.
+- [x] Replace `IHostingEnvironment` → `IWebHostEnvironment`; `app.UseMvc` → endpoint routing (`MapControllerRoute`).
+- [x] Update Autofac wiring to `.UseServiceProviderFactory(new AutofacServiceProviderFactory())`.
+- [x] `dotnet build` + `dotnet run` succeed on .NET 8 locally.
 
 ---
 

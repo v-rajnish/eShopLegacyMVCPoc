@@ -1,0 +1,106 @@
+## .NET / Visual Studio gitignore
+
+# Local backup / snapshot folders (not versioned)
+backup/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Build & restore artifacts
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nuget.props
+*.nuget.targets
+*.nuget.dgspec.json
+*.nuget.g.props
+*.nuget.g.targets
+project.assets.json
+*.EntityFrameworkCore.targets
+
+# NuGet packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+TestResults/
+
+# ASP.NET / MVC
+*.publishsettings
+PublishScripts/
+publish/
+*.azurePubxml
+*.pubxml
+*.pubxml.user
+
+# Application / user secrets & local config
+appsettings.*.local.json
+secrets.json
+*.env
+.env
+.env.local
+
+# ReSharper / dotCover
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Build server / MSBuild
+*.binlog
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Docker
+*.dockerignore.bak
+
+# Misc temp files
+*.tmp
+*.temp
+*.bak
+*.cache
+*~
