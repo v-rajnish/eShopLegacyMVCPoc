@@ -6,16 +6,16 @@
       "value": "poc"
     },
     "location": {
-      "value": "eastus"
+      "value": "westus2"
     },
     "resourceGroupName": {
       "value": "rg-eshop-poc"
     },
     "sqlAadAdminName": {
-      "value": "PLACEHOLDER-entra-admin@contoso.com"
+      "value": "v-rajnishs_microsoft.com#EXT#@MngEnvMCAP400868.onmicrosoft.com"
     },
     "sqlAadAdminObjectId": {
-      "value": "00000000-0000-0000-0000-000000000000"
+      "value": "0e1f3664-5b3e-409f-bcc8-9190905a4dfe"
     },
     "sqlDatabaseName": {
       "value": "eShopPorted"

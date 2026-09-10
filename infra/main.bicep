@@ -30,6 +30,8 @@ var tags = {
   application: 'eShopLegacyMVC'
   environment: environmentName
   managedBy: 'bicep'
+  Purpose: 'eShopLegacyMVC modernization POC'
+  Region: location
 }
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {

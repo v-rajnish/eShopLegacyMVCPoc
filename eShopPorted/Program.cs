@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace eShopPorted
 {
@@ -41,8 +42,18 @@ namespace eShopPorted
             if (!useMockData)
             {
                 using var scope = app.Services.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<CatalogDBContext>();
-                db.Database.Migrate();
+                try
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<CatalogDBContext>();
+                    db.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    // Don't crash startup if the database isn't reachable/authorized yet.
+                    var logger = app.Services.GetRequiredService<ILoggerFactory>()
+                        .CreateLogger("Startup");
+                    logger.LogError(ex, "Database migration failed at startup; continuing without it.");
+                }
             }
 
             if (app.Environment.IsDevelopment())
@@ -55,7 +66,6 @@ namespace eShopPorted
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
 

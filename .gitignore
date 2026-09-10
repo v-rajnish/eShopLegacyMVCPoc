@@ -67,6 +67,7 @@ TestResults/
 *.publishsettings
 PublishScripts/
 publish/
+publish_output/
 *.azurePubxml
 *.pubxml
 *.pubxml.user

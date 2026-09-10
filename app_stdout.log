@@ -1,0 +1,40 @@
+﻿2026-09-01T22:42:12.9904223Z    _____                               
+2026-09-01T22:42:12.9906168Z   /  _  \ __________ _________   ____  
+2026-09-01T22:42:12.9906233Z  /  /_\  \\___   /  |  \_  __ \_/ __ \ 
+2026-09-01T22:42:12.9906267Z /    |    \/    /|  |  /|  | \/\  ___/ 
+2026-09-01T22:42:12.9906299Z \____|__  /_____ \____/ |__|    \___  >
+2026-09-01T22:42:12.9906333Z         \/      \/                  \/ 
+2026-09-01T22:42:12.9906364Z A P P   S E R V I C E   O N   L I N U X
+2026-09-01T22:42:12.9906393Z 
+2026-09-01T22:42:12.9906437Z Documentation       : http://aka.ms/webapp-linux
+2026-09-01T22:42:12.9906495Z Dotnet quickstart   : https://aka.ms/dotnet-qs
+2026-09-01T22:42:12.9906528Z ASP .NETCore Version: 8.0.28
+2026-09-01T22:42:12.9906560Z Instance Name       : lw0sdlwk00093Q
+2026-09-01T22:42:12.9906596Z Instance Id         : a5d95fee1bf8f81a9506cc2f4dfbefc3c9385e5abbf168985860170ea958cdb0
+2026-09-01T22:42:12.9906627Z 
+2026-09-01T22:42:12.9906660Z Note: Any data outside '/home' is not persisted
+2026-09-01T22:42:17.0582652Z Starting OpenBSD Secure Shell server: sshd.
+2026-09-01T22:42:17.1421338Z WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2026-09-01T22:42:17.3809051Z Updating certificates in /etc/ssl/certs...
+2026-09-01T22:43:05.2839037Z rehash: warning: skipping duplicate certificate in azl_SSL.com_TLS_ECC_Root_CA_2022.pem
+2026-09-01T22:43:05.2847272Z rehash: warning: skipping duplicate certificate in azl_SSL.com_TLS_RSA_Root_CA_2022.pem
+2026-09-01T22:43:05.5577303Z rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2026-09-01T22:43:05.6239810Z 4 added, 0 removed; done.
+2026-09-01T22:43:05.6265037Z Running hooks in /etc/ca-certificates/update.d...
+2026-09-01T22:43:05.6551152Z done.
+2026-09-01T22:43:05.6842285Z CA certificates copied and updated successfully.
+2026-09-01T22:43:06.2277262Z Starting periodic command scheduler: cron.
+2026-09-01T22:43:06.2592153Z Running oryx create-script -appPath /home/site/wwwroot -output /opt/startup/startup.sh -defaultAppFilePath /defaulthome/hostingstart/hostingstart.dll     -bindPort 8080 -bindPort2 '' -userStartupCommand '' 
+2026-09-01T22:43:06.6486753Z Could not find build manifest file at '/home/site/wwwroot/oryx-manifest.toml'
+2026-09-01T22:43:06.6490411Z Could not find operation ID in manifest. Generating an operation id...
+2026-09-01T22:43:06.6492257Z Build Operation ID: 23d879ed-d0ab-4bb9-a223-3cf33c48b361
+2026-09-01T22:43:07.8663550Z 
+2026-09-01T22:43:07.8663989Z Agent extension 
+2026-09-01T22:43:07.8664026Z Before if loop >> DotNet Runtime 
+2026-09-01T22:43:07.9753781Z DotNet Runtime 8.0Writing output script to '/opt/startup/startup.sh'
+2026-09-01T22:43:08.1461866Z Trying to find the startup DLL name...
+2026-09-01T22:43:08.1476424Z Found the startup D name: eShopPorted.dll
+2026-09-01T22:43:08.1562119Z Running the command: dotnet "eShopPorted.dll"
+2026-09-01T22:43:22.6089000Z warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+2026-09-01T22:43:22.6089589Z       Failed to determine the https port for redirect.
+
