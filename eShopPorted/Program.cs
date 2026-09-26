@@ -4,7 +4,9 @@ using Autofac.Extensions.DependencyInjection;
 using Azure.Identity;
 using eShopPorted.Models;
 using eShopPorted.Modules;
+using eShopPorted.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,7 +58,7 @@ namespace eShopPorted
             }
 
             builder.Host.ConfigureContainer<ContainerBuilder>(container =>
-                container.RegisterModule(new ApplicationModule(useMockData)));
+                container.RegisterModule(new ApplicationModule(useMockData, builder.Configuration)));
 
             var app = builder.Build();
 
@@ -84,6 +86,24 @@ namespace eShopPorted
                     var logger = app.Services.GetRequiredService<ILoggerFactory>()
                         .CreateLogger("Startup");
                     logger.LogError(ex, "Database migration failed at startup; continuing without it.");
+                }
+            }
+
+            // One-time seeding of the bundled Pics into the "pics" blob container.
+            // No-ops when BlobStorage:ServiceUri is not configured (local dev without blob).
+            using (var seedScope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var blobStorage = seedScope.ServiceProvider.GetRequiredService<IBlobStorageService>();
+                    var webHostEnv = seedScope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+                    BlobStorageSeeder.SeedPicsAsync(blobStorage, webHostEnv.WebRootPath).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    var logger = app.Services.GetRequiredService<ILoggerFactory>()
+                        .CreateLogger("Startup");
+                    logger.LogError(ex, "Pics blob seeding failed at startup; continuing without it.");
                 }
             }
 

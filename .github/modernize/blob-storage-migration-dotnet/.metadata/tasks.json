@@ -1,0 +1,52 @@
+{
+  "$schema": "../tasks-schema.json",
+  "description": "Tasks template for modernization plan. Generate this file alongside plan.md to track individual migration tasks.",
+  "tasks": [
+    {
+      "type": "transform",
+      "id": "001-transform-migration-azure-storage-blob",
+      "description": "Migrate whole-file and document storage from local disk to Azure Blob Storage so all files and images are stored in and served from a blob container instead of the local wwwroot/Pics folder.",
+      "reason": "The application currently stores and serves catalog item images and files directly from the local disk (PicController reads from WebRootPath/Pics and images are served as static files). Local disk storage prevents the app from being stateless and cloud/container ready, and does not scale across instances.",
+      "requirements": "Add the Azure Blob Storage SDK (Azure.Storage.Blobs) and use the existing Azure.Identity package to authenticate with DefaultAzureCredential / Managed Identity so no secrets are stored in code or configuration. Introduce a blob storage service abstraction that supports upload, download, list, and delete operations for files and documents, and register it via dependency injection (Autofac ApplicationModule / Program.cs composition). Add appsettings configuration for the storage account (blob service URI) and container name. Refactor the detected local-disk file-access code paths to read and write from Azure Blob Storage instead of local disk: PicController.Index (which reads image bytes from Path.Combine(env.WebRootPath, \"Pics\") via System.IO.File.ReadAllBytes) must serve images from the blob container, and any other local file/document access (including the static-file serving of /Pics/* and CatalogController.AddUriPlaceHolder picture URIs) must be updated to use blob-backed access. Provide a mechanism or one-time migration to upload the existing local assets (wwwroot/Pics/*.png and any documents) into the blob container. Preserve current behavior (same routes, MIME types, and returned content). Verify the eShopPorted project builds successfully after the changes.",
+      "skills": [
+        {
+          "name": "migration-azure-storage-blob",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    },
+    {
+      "type": "security",
+      "id": "002-security",
+      "description": "Scan all project dependencies for known CVEs and remediate any identified vulnerabilities to ensure the application is secure before deployment.",
+      "reason": "New Azure SDK packages are added during the Blob Storage migration; dependencies must be scanned and patched so the modernized application is free of known vulnerabilities.",
+      "requirements": "Upgrade vulnerable dependencies to the minimum patched version. If a CVE fix requires a major version upgrade, document the affected dependency, the current version, the upgraded major version, and the breaking change risk. Verify that the project builds and all tests pass after remediation.",
+      "dependencies": [
+        "001-transform-migration-azure-storage-blob"
+      ],
+      "skills": [
+        {
+          "name": "validate-cves-and-fix",
+          "location": "builtin"
+        }
+      ],
+      "successCriteria": {
+        "passBuild": "true",
+        "generateNewUnitTests": "false",
+        "passUnitTests": "true"
+      }
+    }
+  ],
+  "metadata": {
+    "planName": "Migrate Local File Storage to Azure Blob Storage",
+    "projectName": "eShopPorted",
+    "language": "dotnet",
+    "createdAt": "2026-09-26T00:00:00Z",
+    "version": "1.0"
+  }
+}

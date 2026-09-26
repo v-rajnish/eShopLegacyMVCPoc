@@ -1,8 +1,8 @@
 ﻿using eShopPorted.Services;
 using log4net;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace eShopPorted.Controllers
 {
@@ -13,18 +13,18 @@ namespace eShopPorted.Controllers
         public const string GetPicRouteName = "GetPicRouteTemplate";
 
         private readonly ICatalogService service;
-        private readonly IWebHostEnvironment env;
+        private readonly IBlobStorageService blobStorage;
 
-        public PicController(ICatalogService service, IWebHostEnvironment env)
+        public PicController(ICatalogService service, IBlobStorageService blobStorage)
         {
             this.service = service;
-            this.env = env;
+            this.blobStorage = blobStorage;
         }
 
         // GET: items/5/pic
         [HttpGet]
         [Route("items/{catalogItemId:int}/pic", Name = GetPicRouteName)]
-        public ActionResult Index(int catalogItemId)
+        public async Task<IActionResult> Index(int catalogItemId)
         {
             _log.Info($"Now loading... /items/Index?{catalogItemId}/pic");
 
@@ -37,20 +37,37 @@ namespace eShopPorted.Controllers
 
             if (item != null)
             {
-                var picsRoot = Path.Combine(env.WebRootPath, "Pics");
                 // Guard against path traversal by using only the file name portion.
                 var fileName = Path.GetFileName(item.PictureFileName);
-                var path = Path.Combine(picsRoot, fileName);
-
-                string imageFileExtension = Path.GetExtension(fileName);
-                string mimetype = GetImageMimeTypeFromImageFileExtension(imageFileExtension);
-
-                var buffer = System.IO.File.ReadAllBytes(path);
-
-                return File(buffer, mimetype);
+                return await GetPicResultAsync(fileName);
             }
 
             return NotFound();
+        }
+
+        // GET: /Pics/1.png — preserves the PictureUri = /Pics/{Id}.png contract by serving
+        // the image from the "pics" blob container through the controller.
+        [HttpGet]
+        [Route("Pics/{fileName}")]
+        public Task<IActionResult> Get(string fileName)
+        {
+            _log.Info($"Now loading... /Pics/{fileName}");
+            return GetPicResultAsync(Path.GetFileName(fileName));
+        }
+
+        private async Task<IActionResult> GetPicResultAsync(string fileName)
+        {
+            var buffer = await blobStorage.GetPicAsync(fileName);
+
+            if (buffer == null)
+            {
+                return NotFound();
+            }
+
+            string imageFileExtension = Path.GetExtension(fileName);
+            string mimetype = GetImageMimeTypeFromImageFileExtension(imageFileExtension);
+
+            return File(buffer, mimetype);
         }
 
         private string GetImageMimeTypeFromImageFileExtension(string extension)
