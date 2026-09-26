@@ -49,6 +49,7 @@ var keyVaultName = take('${prefix}kv${resourceToken}', 24)
 var appServicePlanName = '${prefix}-plan-${resourceToken}'
 var webAppName = '${prefix}-web-${resourceToken}'
 var sqlServerName = '${prefix}-sql-${resourceToken}'
+var storageAccountName = take('${prefix}st${resourceToken}', 24)
 
 // ---------------------------------------------------------------------------
 // User-assigned managed identity (used by App Service for SQL + Key Vault)
@@ -365,6 +366,143 @@ resource demoRandomKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 }
 
 // ---------------------------------------------------------------------------
+// Azure Storage account (Blob) for file & document storage.
+// Passwordless data-plane access via the user-assigned managed identity (RBAC).
+// Public network access disabled (org policy); reachable via a private endpoint.
+// ---------------------------------------------------------------------------
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: storageAccountName
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+    allowBlobPublicAccess: false
+    allowSharedKeyAccess: false
+    publicNetworkAccess: 'Disabled'
+    networkAcls: {
+      defaultAction: 'Deny'
+      bypass: 'AzureServices'
+    }
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource picsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: 'pics'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+resource documentsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: 'documents'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+// Data-plane RBAC for passwordless blob access. Requires the deploying identity
+// to have Microsoft.Authorization/roleAssignments/write (e.g. a pipeline service
+// principal with Owner/User Access Administrator). Set to false to skip when the
+// deploying identity cannot create role assignments (assign them manually instead).
+@description('Whether to create the Storage Blob Data Contributor role assignments as part of this deployment.')
+param assignBlobDataRbac bool = true
+
+// Built-in role: Storage Blob Data Contributor
+var storageBlobDataContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+
+// Grant the app's managed identity data-plane access to blobs (passwordless).
+resource identityBlobRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (assignBlobDataRbac) {
+  scope: storageAccount
+  name: guid(storageAccount.id, identity.id, storageBlobDataContributorRoleId)
+  properties: {
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: storageBlobDataContributorRoleId
+  }
+}
+
+// Grant the developer (SQL Entra admin) blob data access for local seeding/inspection.
+resource adminBlobRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (assignBlobDataRbac) {
+  scope: storageAccount
+  name: guid(storageAccount.id, sqlAadAdminObjectId, storageBlobDataContributorRoleId)
+  properties: {
+    principalId: sqlAadAdminObjectId
+    principalType: 'User'
+    roleDefinitionId: storageBlobDataContributorRoleId
+  }
+}
+
+// Private DNS zone for Blob private link + link to the VNet
+resource blobPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.blob.${environment().suffixes.storage}'
+  location: 'global'
+  tags: tags
+}
+
+resource blobDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: blobPrivateDnsZone
+  name: '${vnetName}-blob-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: vnet.id
+    }
+  }
+}
+
+// Private endpoint for Blob storage (public access is disabled by policy)
+resource blobPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
+  name: '${storageAccountName}-blob-pe'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: '${vnet.id}/subnets/snet-pe'
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${storageAccountName}-blob-plsc'
+        properties: {
+          privateLinkServiceId: storageAccount.id
+          groupIds: [
+            'blob'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource blobPeDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-11-01' = {
+  parent: blobPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'blob'
+        properties: {
+          privateDnsZoneId: blobPrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+// ---------------------------------------------------------------------------
 // App Service Plan (Linux) + Web App (.NET 8)
 // ---------------------------------------------------------------------------
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
@@ -432,12 +570,25 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
           name: 'KeyVaultUri'
           value: keyVault.properties.vaultUri
         }
+        {
+          name: 'BlobStorage__ServiceUri'
+          value: storageAccount.properties.primaryEndpoints.blob
+        }
+        {
+          name: 'BlobStorage__PicsContainer'
+          value: picsContainer.name
+        }
+        {
+          name: 'BlobStorage__DocumentsContainer'
+          value: documentsContainer.name
+        }
       ]
     }
   }
   dependsOn: [
     sqlPeDnsGroup
     keyVaultPeDnsGroup
+    blobPeDnsGroup
   ]
 }
 
@@ -454,3 +605,5 @@ output managedIdentityName string = identity.name
 output managedIdentityClientId string = identity.properties.clientId
 output managedIdentityPrincipalId string = identity.properties.principalId
 output appInsightsName string = appInsights.name
+output storageAccountName string = storageAccount.name
+output storageBlobEndpoint string = storageAccount.properties.primaryEndpoints.blob

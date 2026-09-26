@@ -19,6 +19,9 @@
     },
     "sqlDatabaseName": {
       "value": "eShopPorted"
+    },
+    "assignBlobDataRbac": {
+      "value": true
     }
   }
 }

@@ -26,6 +26,9 @@ param sqlAadAdminObjectId string = '00000000-0000-0000-0000-000000000000'
 @description('Name of the Azure SQL database.')
 param sqlDatabaseName string = 'eShopPorted'
 
+@description('Whether to create the Storage Blob Data Contributor role assignments. Set false when the deploying identity lacks roleAssignments/write.')
+param assignBlobDataRbac bool = true
+
 var tags = {
   application: 'eShopLegacyMVC'
   environment: environmentName
@@ -50,6 +53,7 @@ module resources 'resources.bicep' = {
     sqlAadAdminName: sqlAadAdminName
     sqlAadAdminObjectId: sqlAadAdminObjectId
     sqlDatabaseName: sqlDatabaseName
+    assignBlobDataRbac: assignBlobDataRbac
   }
 }
 
@@ -64,4 +68,6 @@ output KEY_VAULT_URI string = resources.outputs.keyVaultUri
 output MANAGED_IDENTITY_NAME string = resources.outputs.managedIdentityName
 output MANAGED_IDENTITY_CLIENT_ID string = resources.outputs.managedIdentityClientId
 output APPLICATION_INSIGHTS_NAME string = resources.outputs.appInsightsName
+output STORAGE_ACCOUNT_NAME string = resources.outputs.storageAccountName
+output STORAGE_BLOB_ENDPOINT string = resources.outputs.storageBlobEndpoint
 
