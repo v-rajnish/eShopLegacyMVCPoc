@@ -60,6 +60,7 @@ output WEB_APP_URL string = resources.outputs.webAppUrl
 output SQL_SERVER_FQDN string = resources.outputs.sqlServerFqdn
 output SQL_DATABASE_NAME string = resources.outputs.sqlDatabaseName
 output KEY_VAULT_NAME string = resources.outputs.keyVaultName
+output KEY_VAULT_URI string = resources.outputs.keyVaultUri
 output MANAGED_IDENTITY_NAME string = resources.outputs.managedIdentityName
 output MANAGED_IDENTITY_CLIENT_ID string = resources.outputs.managedIdentityClientId
 output APPLICATION_INSIGHTS_NAME string = resources.outputs.appInsightsName

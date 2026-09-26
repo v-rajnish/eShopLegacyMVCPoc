@@ -1,0 +1,32 @@
+@{
+    ViewBag.Title = "Key Vault Demo";
+}
+
+<div class="esh-table">
+    <div class="container">
+        <h2>Key Vault Demo</h2>
+        <p>This page proves the app reads a secret directly from Azure Key Vault at runtime (via the SDK + managed identity, over the private endpoint).</p>
+
+        <table class="table">
+            <tr>
+                <th>Key Vault URI</th>
+                <td>@ViewBag.KeyVaultUri</td>
+            </tr>
+            <tr>
+                <th>demo-random-key value</th>
+                <td>
+                    @if (string.IsNullOrEmpty(ViewBag.RandomSecret))
+                    {
+                        <span class="text-danger">Not available (Key Vault unreachable or secret missing)</span>
+                    }
+                    else
+                    {
+                        <code>@ViewBag.RandomSecret</code>
+                    }
+                </td>
+            </tr>
+        </table>
+
+        <p class="text-muted">Note: this value is shown only because it's a throwaway demo secret for learning purposes. Never render real secrets in a page like this.</p>
+    </div>
+</div>

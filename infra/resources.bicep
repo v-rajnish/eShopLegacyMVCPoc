@@ -30,6 +30,10 @@ param appServicePlanSku string = 'B1'
 @description('Azure SQL database SKU name.')
 param sqlDatabaseSku string = 'S0'
 
+@secure()
+@description('Random value regenerated each deployment, stored as a demo Key Vault secret.')
+param randomSecretSeed string = newGuid()
+
 // Deterministic unique token for globally-unique names
 var resourceToken = uniqueString(subscription().id, resourceGroup().id, environmentName)
 var prefix = 'eshop'
@@ -97,12 +101,26 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
     enableRbacAuthorization: false
     enableSoftDelete: true
     softDeleteRetentionInDays: 7
+    // Private-endpoint-only (org policy forces this regardless). Reachable from
+    // inside the VNet via the private endpoint defined below.
     publicNetworkAccess: 'Disabled'
     // Grant the managed identity read access to secrets via access policy
     accessPolicies: [
       {
         tenantId: subscription().tenantId
         objectId: identity.properties.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+      }
+      {
+        // Grants the SQL Entra admin (the developer running this POC) secret read
+        // access so secrets can be inspected locally, e.g. `az keyvault secret show`.
+        tenantId: subscription().tenantId
+        objectId: sqlAadAdminObjectId
         permissions: {
           secrets: [
             'get'
@@ -254,10 +272,97 @@ resource sqlPeDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@
   }
 }
 
+// Private DNS zone for Key Vault private link + link to the VNet
+resource keyVaultPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.vaultcore.azure.net'
+  location: 'global'
+  tags: tags
+}
+
+resource keyVaultDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: keyVaultPrivateDnsZone
+  name: '${vnetName}-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: vnet.id
+    }
+  }
+}
+
+// Private endpoint for Key Vault (public access is disabled by policy)
+resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
+  name: '${keyVaultName}-pe'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: '${vnet.id}/subnets/snet-pe'
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${keyVaultName}-plsc'
+        properties: {
+          privateLinkServiceId: keyVault.id
+          groupIds: [
+            'vault'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource keyVaultPeDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-11-01' = {
+  parent: keyVaultPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'vault'
+        properties: {
+          privateDnsZoneId: keyVaultPrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
 // Passwordless SQL connection string (Entra ID via user-assigned managed identity).
-// Contains no secret (auth is via managed identity), so it is injected directly as an
-// app setting rather than stored in Key Vault (which policy forces to private-only).
 var sqlConnectionString = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Database=${sqlDatabaseName};Authentication=Active Directory Default;User Id=${identity.properties.clientId};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+
+// ---------------------------------------------------------------------------
+// Key Vault secrets
+// - sql-connection-string: read by App Service natively via a Key Vault
+//   reference app setting (no SDK code needed in the app).
+// - demo-api-key: a sample value read directly by the app at startup using
+//   the Azure Key Vault SDK + DefaultAzureCredential, to demonstrate that pattern.
+// ---------------------------------------------------------------------------
+resource sqlConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'sql-connection-string'
+  properties: {
+    value: sqlConnectionString
+  }
+}
+
+resource demoApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'demo-api-key'
+  properties: {
+    value: 'demo-secret-value-${uniqueString(resourceGroup().id, deployment().name)}'
+  }
+}
+
+// Random secret regenerated on every deployment, displayed on the app's Key Vault demo page.
+resource demoRandomKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'demo-random-key'
+  properties: {
+    value: randomSecretSeed
+  }
+}
 
 // ---------------------------------------------------------------------------
 // App Service Plan (Linux) + Web App (.NET 8)
@@ -307,7 +412,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'UseMockData'
-          value: 'false'
+          value: 'true'
         }
         {
           name: 'AZURE_CLIENT_ID'
@@ -319,13 +424,18 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'ConnectionStrings__DefaultConnection'
-          value: sqlConnectionString
+          value: '@Microsoft.KeyVault(SecretUri=${sqlConnectionSecret.properties.secretUri})'
+        }
+        {
+          name: 'KeyVaultUri'
+          value: keyVault.properties.vaultUri
         }
       ]
     }
   }
   dependsOn: [
     sqlPeDnsGroup
+    keyVaultPeDnsGroup
   ]
 }
 
@@ -337,6 +447,7 @@ output webAppUrl string = 'https://${webApp.properties.defaultHostName}'
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
 output sqlDatabaseName string = sqlDatabase.name
 output keyVaultName string = keyVault.name
+output keyVaultUri string = keyVault.properties.vaultUri
 output managedIdentityName string = identity.name
 output managedIdentityClientId string = identity.properties.clientId
 output managedIdentityPrincipalId string = identity.properties.principalId

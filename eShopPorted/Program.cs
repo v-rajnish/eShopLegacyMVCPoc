@@ -1,6 +1,7 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Azure.Identity;
 using eShopPorted.Models;
 using eShopPorted.Modules;
 using Microsoft.AspNetCore.Builder;
@@ -20,6 +21,26 @@ namespace eShopPorted
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // If KeyVaultUri is set (injected by Bicep in Azure, optional locally),
+            // pull secrets directly into IConfiguration using the app's identity.
+            // Locally, DefaultAzureCredential falls back to your `az login` session.
+            // Wrapped in try/catch: Key Vault being unreachable (firewall, network,
+            // permissions) must never prevent the app from starting.
+            string keyVaultUri = builder.Configuration["KeyVaultUri"];
+            bool keyVaultLoaded = false;
+            if (!string.IsNullOrWhiteSpace(keyVaultUri))
+            {
+                try
+                {
+                    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), new DefaultAzureCredential());
+                    keyVaultLoaded = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"[Startup] Key Vault unreachable at '{keyVaultUri}', continuing without it: {ex.Message}");
+                }
+            }
+
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
             bool useMockData = builder.Configuration.GetValue<bool>("UseMockData");
@@ -38,6 +59,16 @@ namespace eShopPorted
                 container.RegisterModule(new ApplicationModule(useMockData)));
 
             var app = builder.Build();
+
+            // Proves the SDK-based Key Vault read worked, without logging the secret value itself.
+            if (keyVaultLoaded)
+            {
+                var demoSecret = app.Configuration["demo-api-key"];
+                app.Logger.LogInformation(
+                    "Key Vault demo secret 'demo-api-key' loaded: {Loaded} (length={Length})",
+                    string.IsNullOrEmpty(demoSecret) ? "NO" : "YES",
+                    demoSecret?.Length ?? 0);
+            }
 
             if (!useMockData)
             {

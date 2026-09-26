@@ -90,6 +90,14 @@ msbuild.log
 msbuild.err
 msbuild.wrn
 
+# Log files
+*.log
+
+# Archives / publish bundles
+*.zip
+publish.zip
+publish_output.zip
+
 # OS files
 .DS_Store
 Thumbs.db

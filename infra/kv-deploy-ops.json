@@ -1,0 +1,96 @@
+﻿[
+  {
+    "id": "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/providers/Microsoft.Resources/deployments/eshop-kv-firewall/operations/23E806B84D9EA85C",
+    "operationId": "23E806B84D9EA85C",
+    "properties": {
+      "duration": "PT1M14.4630206S",
+      "provisioningOperation": "Read",
+      "provisioningState": "Succeeded",
+      "request": null,
+      "response": null,
+      "serviceRequestId": null,
+      "statusCode": "OK",
+      "statusMessage": null,
+      "targetResource": {
+        "apiVersion": "2025-04-01",
+        "extension": null,
+        "id": "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/resourceGroups/rg-eshop-poc/providers/Microsoft.Resources/deployments/eshop-resources",
+        "identifiers": null,
+        "resourceGroup": "rg-eshop-poc",
+        "resourceName": "eshop-resources",
+        "resourceType": "Microsoft.Resources/deployments",
+        "symbolicName": null
+      },
+      "timestamp": "2026-09-24T09:29:24.299977+00:00",
+      "trackingId": "993fe0b3-d97f-47b5-964e-db4987a4726e"
+    }
+  },
+  {
+    "id": "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/providers/Microsoft.Resources/deployments/eshop-kv-firewall/operations/608290000201BC39",
+    "operationId": "608290000201BC39",
+    "properties": {
+      "duration": "PT1M14.2599012S",
+      "provisioningOperation": "Create",
+      "provisioningState": "Succeeded",
+      "request": null,
+      "response": null,
+      "serviceRequestId": null,
+      "statusCode": "OK",
+      "statusMessage": null,
+      "targetResource": {
+        "apiVersion": null,
+        "extension": null,
+        "id": "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/resourceGroups/rg-eshop-poc/providers/Microsoft.Resources/deployments/eshop-resources",
+        "identifiers": null,
+        "resourceGroup": "rg-eshop-poc",
+        "resourceName": "eshop-resources",
+        "resourceType": "Microsoft.Resources/deployments",
+        "symbolicName": null
+      },
+      "timestamp": "2026-09-24T09:29:24.299977+00:00",
+      "trackingId": "ea1ac40a-8a16-49ae-a127-ab64a79733bf"
+    }
+  },
+  {
+    "id": "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/providers/Microsoft.Resources/deployments/eshop-kv-firewall/operations/8E76B81458D405C6",
+    "operationId": "8E76B81458D405C6",
+    "properties": {
+      "duration": "PT4.816382S",
+      "provisioningOperation": "Create",
+      "provisioningState": "Succeeded",
+      "request": null,
+      "response": null,
+      "serviceRequestId": null,
+      "statusCode": "OK",
+      "statusMessage": null,
+      "targetResource": {
+        "apiVersion": null,
+        "extension": null,
+        "id": "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/resourceGroups/rg-eshop-poc",
+        "identifiers": null,
+        "resourceName": "rg-eshop-poc",
+        "resourceType": "Microsoft.Resources/resourceGroups",
+        "symbolicName": null
+      },
+      "timestamp": "2026-09-24T09:29:24.299977+00:00",
+      "trackingId": "194b1ac9-c139-4394-b933-8513f0b12bb6"
+    }
+  },
+  {
+    "id": "/subscriptions/95642268-5116-484d-9b88-7dfce8c20ce4/providers/Microsoft.Resources/deployments/eshop-kv-firewall/operations/08584113647312152612",
+    "operationId": "08584113647312152612",
+    "properties": {
+      "duration": "PT1M14.634888S",
+      "provisioningOperation": "EvaluateDeploymentOutput",
+      "provisioningState": "Succeeded",
+      "request": null,
+      "response": null,
+      "serviceRequestId": null,
+      "statusCode": "OK",
+      "statusMessage": null,
+      "targetResource": null,
+      "timestamp": "2026-09-24T09:29:24.299977+00:00",
+      "trackingId": "ef5b2d0e-69b3-4b0a-ab95-12ad99d5c521"
+    }
+  }
+]
